@@ -759,7 +759,8 @@
 
         function formatPhoneInternational(phone) {
             const digits = phone.replace(/\D/g, '');
-            return '55' + digits; // ex: 5551999999999
+            // Se já tem 12+ dígitos, já inclui código do país
+            return digits.length >= 12 ? digits : '55' + digits;
         }
 
         // ─────────────────────────────────────────
