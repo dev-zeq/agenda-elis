@@ -720,7 +720,7 @@
         // Init
         // ─────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
-            generateDates();
+            generateDates(); // async — carrega bloqueios e renderiza
             generateTimes();
 
             document.getElementById('input-name').addEventListener('input', e => {
@@ -764,21 +764,32 @@
         }
 
         // ─────────────────────────────────────────
-        // Generate Dates (next 7 business days)
+        // Generate Dates (next 30 business days, skipping blocked)
         // ─────────────────────────────────────────
-        function generateDates() {
+        async function generateDates() {
             const grid = document.getElementById('dates-grid');
             const today = new Date();
-            let count = 0;
 
-            for (let i = 1; count < 7 && i <= 14; i++) {
+            // Busca datas bloqueadas pela Elis
+            let blocked = [];
+            try {
+                const res = await fetch(SHEETS_URL + '?action=blocked');
+                const data = await res.json();
+                blocked = data.dates || [];
+            } catch (e) {}
+
+            let count = 0;
+            for (let i = 1; count < 30 && i <= 60; i++) {
                 const d = new Date(today);
                 d.setDate(d.getDate() + i);
 
                 const dow = d.getDay();
-                if (dow === 0 || dow === 6) continue; // skip weekends
-                count++;
+                if (dow === 0 || dow === 6) continue; // pula fins de semana
 
+                const dateStr = d.toISOString().split('T')[0];
+                if (blocked.includes(dateStr)) continue; // pula dias bloqueados
+
+                count++;
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'btn-select';
