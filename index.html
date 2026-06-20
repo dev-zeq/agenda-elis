@@ -442,6 +442,81 @@
         }
 
         /* ─────────────────────────────────────────
+           Services Step
+        ───────────────────────────────────────── */
+        .services-loading {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px 0;
+            font-size: 14px;
+        }
+
+        .service-category {
+            margin-bottom: 18px;
+        }
+
+        .service-category-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(244, 114, 182, 0.15);
+        }
+
+        .service-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border: 1.5px solid rgba(200, 140, 170, 0.22);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.55);
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, transform 0.15s;
+            margin-bottom: 7px;
+            gap: 10px;
+        }
+
+        .service-card:hover {
+            border-color: var(--rose-400);
+            background: rgba(255,255,255,0.8);
+            transform: translateY(-1px);
+        }
+
+        .service-card.selected {
+            border-color: var(--rose-400);
+            background: linear-gradient(135deg, rgba(251,207,232,0.45), rgba(255,255,255,0.75));
+            box-shadow: 0 0 0 3px rgba(244,114,182,0.14);
+        }
+
+        .service-card-name {
+            font-size: 13.5px;
+            font-weight: 500;
+            color: var(--text-dark);
+            flex: 1;
+        }
+
+        .service-card-meta {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .service-card-price {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--rose-500);
+        }
+
+        .service-card-duration {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        /* ─────────────────────────────────────────
            Success Step
         ───────────────────────────────────────── */
         @keyframes checkPop {
@@ -588,6 +663,7 @@
             <div class="progress-seg active" id="progress-1"></div>
             <div class="progress-seg"        id="progress-2"></div>
             <div class="progress-seg"        id="progress-3"></div>
+            <div class="progress-seg"        id="progress-4"></div>
         </div>
 
         <!-- ── Glass Card ─────────────────────── -->
@@ -633,8 +709,36 @@
 
             </div>
 
-            <!-- Step 2 — Selecionar Data -->
+            <!-- Step 2 — Selecionar Serviço -->
             <div id="step-2" class="step-content hidden">
+
+                <div>
+                    <span class="field-label">Selecione o serviço</span>
+                </div>
+
+                <div id="services-grid">
+                    <div class="services-loading">Carregando serviços...</div>
+                </div>
+
+                <div id="error-2" class="error-box hidden">
+                    <svg class="error-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <p id="error-2-text" class="error-text"></p>
+                </div>
+
+                <button id="btn-next-2" class="btn-primary" onclick="goToStep(3)" disabled>
+                    Escolher Data
+                </button>
+
+                <button class="btn-ghost" onclick="goToStep(1)">
+                    Voltar
+                </button>
+
+            </div>
+
+            <!-- Step 3 — Selecionar Data -->
+            <div id="step-3" class="step-content hidden">
 
                 <div>
                     <span class="field-label">Escolha a data</span>
@@ -644,18 +748,18 @@
                     <!-- Filled via JS -->
                 </div>
 
-                <button id="btn-next-2" class="btn-primary" onclick="goToStep(3)" disabled>
+                <button id="btn-next-3" class="btn-primary" onclick="goToStep(4)" disabled>
                     Escolher Horário
                 </button>
 
-                <button class="btn-ghost" onclick="goToStep(1)">
+                <button class="btn-ghost" onclick="goToStep(2)">
                     Voltar
                 </button>
 
             </div>
 
-            <!-- Step 3 — Selecionar Horário -->
-            <div id="step-3" class="step-content hidden">
+            <!-- Step 4 — Selecionar Horário -->
+            <div id="step-4" class="step-content hidden">
 
                 <div>
                     <span class="field-label">Escolha o horário</span>
@@ -666,25 +770,25 @@
                     <!-- Filled via JS -->
                 </div>
 
-                <div id="error-3" class="error-box hidden">
+                <div id="error-4" class="error-box hidden">
                     <svg class="error-icon" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                     </svg>
-                    <p id="error-3-text" class="error-text"></p>
+                    <p id="error-4-text" class="error-text"></p>
                 </div>
 
                 <button id="btn-submit" class="btn-primary" onclick="submitForm()">
                     Confirmar Agendamento
                 </button>
 
-                <button class="btn-ghost" onclick="goToStep(2)">
+                <button class="btn-ghost" onclick="goToStep(3)">
                     Voltar
                 </button>
 
             </div>
 
-            <!-- Step 4 — Confirmação -->
-            <div id="step-4" class="step-content hidden" style="align-items: center; text-align: center; padding: 8px 0;">
+            <!-- Step 5 — Confirmação -->
+            <div id="step-5" class="step-content hidden" style="align-items: center; text-align: center; padding: 8px 0;">
 
                 <div class="check-circle">
                     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
@@ -698,6 +802,14 @@
                 </div>
 
                 <div class="confirm-card" style="width: 100%;">
+                    <div class="confirm-row">
+                        <span class="confirm-label">Serviço</span>
+                        <span id="confirm-servico" class="confirm-value"></span>
+                    </div>
+                    <div class="confirm-row">
+                        <span class="confirm-label">Valor</span>
+                        <span id="confirm-preco" class="confirm-value"></span>
+                    </div>
                     <div class="confirm-row">
                         <span class="confirm-label">Data</span>
                         <span id="confirm-date" class="confirm-value"></span>
@@ -734,13 +846,14 @@
         // State
         // ─────────────────────────────────────────
         let currentStep = 1;
-        let formData = { name: '', phone: '', date: '', time: '', dateLabel: '' };
+        let formData = { name: '', phone: '', servico: '', preco: 0, duracao: '', date: '', time: '', dateLabel: '' };
         let selectedDate = null;
 
         // ─────────────────────────────────────────
         // Init
         // ─────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
+            loadServicos(); // async — carrega serviços disponíveis
             generateDates(); // async — carrega bloqueios e renderiza
             generateTimes();
 
@@ -768,6 +881,71 @@
             }
             input.value = v;
             formData.phone = input.value;
+        }
+
+        // ─────────────────────────────────────────
+        // Services — load & select
+        // ─────────────────────────────────────────
+        async function loadServicos() {
+            const container = document.getElementById('services-grid');
+            try {
+                const res  = await fetch(SHEETS_URL + '?action=servicos');
+                const data = await res.json();
+                const lista = (data.servicos || []).filter(s => s.ativo);
+
+                if (!lista.length) {
+                    container.innerHTML = '<div class="services-loading">Nenhum serviço disponível.</div>';
+                    return;
+                }
+
+                // Agrupa por categoria
+                const cats = {};
+                const catOrder = [];
+                lista.forEach(s => {
+                    if (!cats[s.categoria]) { cats[s.categoria] = []; catOrder.push(s.categoria); }
+                    cats[s.categoria].push(s);
+                });
+
+                container.innerHTML = '';
+                catOrder.forEach(cat => {
+                    const group = document.createElement('div');
+                    group.className = 'service-category';
+
+                    const label = document.createElement('div');
+                    label.className = 'service-category-label';
+                    label.textContent = cat;
+                    group.appendChild(label);
+
+                    cats[cat].forEach(s => {
+                        const card = document.createElement('div');
+                        card.className = 'service-card';
+                        card.innerHTML = `
+                            <div class="service-card-name">${s.servico}</div>
+                            <div class="service-card-meta">
+                                <div class="service-card-price">R$ ${s.preco}</div>
+                                ${s.duracao ? `<div class="service-card-duration">${s.duracao}</div>` : ''}
+                            </div>
+                        `;
+                        card.addEventListener('click', () => selectServico(s, card));
+                        group.appendChild(card);
+                    });
+
+                    container.appendChild(group);
+                });
+            } catch (e) {
+                container.innerHTML = '<div class="services-loading">Erro ao carregar serviços. Tente novamente.</div>';
+            }
+        }
+
+        function selectServico(s, card) {
+            document.querySelectorAll('#services-grid .service-card')
+                .forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            formData.servico = s.servico;
+            formData.preco   = s.preco;
+            formData.duracao = s.duracao || '';
+            hideError(2);
+            document.getElementById('btn-next-2').disabled = false;
         }
 
         // ─────────────────────────────────────────
@@ -877,7 +1055,7 @@
                 weekday: 'long', day: '2-digit', month: 'long'
             });
             formData.time = '';
-            document.getElementById('btn-next-2').disabled = false;
+            document.getElementById('btn-next-3').disabled = false;
 
             // Marca horários já ocupados para esta data
             document.querySelectorAll('#times-grid .btn-select').forEach(b => {
@@ -934,6 +1112,15 @@
                 }
             }
 
+            // Validate before leaving step 2
+            if (currentStep === 2 && target === 3) {
+                hideError(2);
+                if (!formData.servico) {
+                    showError(2, 'Por favor, selecione um serviço');
+                    return;
+                }
+            }
+
             document.getElementById(`step-${currentStep}`).classList.add('hidden');
             const next = document.getElementById(`step-${target}`);
             next.classList.remove('hidden');
@@ -943,7 +1130,7 @@
             next.style.animation = '';
 
             // Update progress bar
-            for (let i = 1; i <= 3; i++) {
+            for (let i = 1; i <= 4; i++) {
                 const seg = document.getElementById(`progress-${i}`);
                 if (i <= target) seg.classList.add('active');
                 else             seg.classList.remove('active');
@@ -957,11 +1144,11 @@
         // Google Sheets — fire and forget
         // Usa no-cors + URLSearchParams para evitar preflight CORS do Apps Script
         // ─────────────────────────────────────────
-        function sendToSheets({ name, phone, date, time }) {
+        function sendToSheets({ name, phone, date, time, servico }) {
             fetch(SHEETS_URL, {
                 method: 'POST',
                 mode:   'no-cors',
-                body:   new URLSearchParams({ name, phone, date, time }),
+                body:   new URLSearchParams({ name, phone, date, time, servico: servico || '' }),
             }).catch(() => {});
         }
 
@@ -969,10 +1156,10 @@
         // Submit
         // ─────────────────────────────────────────
         async function submitForm() {
-            hideError(3);
+            hideError(4);
 
-            if (!formData.date) { showError(3, 'Por favor, selecione uma data'); return; }
-            if (!formData.time) { showError(3, 'Por favor, selecione um horário'); return; }
+            if (!formData.date) { showError(4, 'Por favor, selecione uma data'); return; }
+            if (!formData.time) { showError(4, 'Por favor, selecione um horário'); return; }
 
             const btn = document.getElementById('btn-submit');
             btn.disabled = true;
@@ -984,7 +1171,9 @@
                 phone:     formatPhoneInternational(formData.phone),
                 date:      formData.date,
                 time:      formData.time,
-                message:   `*Nova Solicitação de Agendamento — Elis Miranda*\n\nNome: ${formData.name.trim()}\nTelefone: ${formData.phone}\nData: ${formData.dateLabel}\nHorário: ${formData.time}\n\n_Confirmar agendamento via WhatsApp_`,
+                servico:   formData.servico,
+                preco:     formData.preco,
+                message:   `*Nova Solicitação de Agendamento — Elis Miranda*\n\nNome: ${formData.name.trim()}\nTelefone: ${formData.phone}\nServiço: ${formData.servico} (R$ ${formData.preco})\nData: ${formData.dateLabel}\nHorário: ${formData.time}\n\n_Confirmar agendamento via WhatsApp_`,
                 timestamp: new Date().toISOString(),
             };
 
@@ -998,30 +1187,33 @@
                 if (res.ok) {
                     // Salvar no Google Sheets (sem bloquear o fluxo)
                     sendToSheets({
-                        name:  formData.name.trim(),
-                        phone: formatPhoneInternational(formData.phone),
-                        date:  formData.date,
-                        time:  formData.time,
+                        name:    formData.name.trim(),
+                        phone:   formatPhoneInternational(formData.phone),
+                        date:    formData.date,
+                        time:    formData.time,
+                        servico: formData.servico,
                     });
 
                     // Populate success card
-                    document.getElementById('confirm-date').textContent = formData.dateLabel;
-                    document.getElementById('confirm-time').textContent = formData.time;
+                    document.getElementById('confirm-servico').textContent = formData.servico;
+                    document.getElementById('confirm-preco').textContent   = `R$ ${formData.preco}`;
+                    document.getElementById('confirm-date').textContent    = formData.dateLabel;
+                    document.getElementById('confirm-time').textContent    = formData.time;
 
                     // All segments active
-                    for (let i = 1; i <= 3; i++)
+                    for (let i = 1; i <= 4; i++)
                         document.getElementById(`progress-${i}`).classList.add('active');
 
                     document.getElementById(`step-${currentStep}`).classList.add('hidden');
-                    document.getElementById('step-4').classList.remove('hidden');
-                    currentStep = 4;
+                    document.getElementById('step-5').classList.remove('hidden');
+                    currentStep = 5;
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
-                    showError(3, 'Erro ao enviar agendamento. Tente novamente.');
+                    showError(4, 'Erro ao enviar agendamento. Tente novamente.');
                 }
             } catch (err) {
                 console.error('Agendamento error:', err);
-                showError(3, 'Erro de conexão. Verifique sua internet e tente novamente.');
+                showError(4, 'Erro de conexão. Verifique sua internet e tente novamente.');
             } finally {
                 btn.disabled = false;
                 btn.classList.remove('loading');
