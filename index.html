@@ -658,7 +658,12 @@
                 Agende seu<br><em>atendimento</em>
             </h1>
             <div class="gold-line"></div>
-            <p class="header-sub">
+            <div id="servico-badge" style="display:none; margin-top:0.75rem;">
+                <span style="display:inline-block; background:rgba(212,175,55,.15); color:#a07c1e; border:1px solid rgba(212,175,55,.35); border-radius:999px; padding:5px 16px; font-size:0.8rem; font-weight:600; letter-spacing:0.01em;">
+                    💅 <span id="servico-badge-text"></span>
+                </span>
+            </div>
+            <p id="header-sub" class="header-sub">
                 Preencha os dados e escolha<br>seu horário preferido
             </p>
         </header>
@@ -857,6 +862,12 @@
         // ─────────────────────────────────────────
         // Init
         // ─────────────────────────────────────────
+        // Serviço pré-selecionado via URL (?servico=Nome+do+Servico)
+        const _urlServico = new URLSearchParams(window.location.search).get('servico');
+        if (_urlServico) {
+            formData.servico = decodeURIComponent(_urlServico);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             loadServicos(); // async — carrega serviços disponíveis
             generateDates(); // async — carrega bloqueios e renderiza
@@ -870,6 +881,13 @@
                 formData.phone = e.target.value;
                 applyPhoneMask(e.target);
             });
+
+            // Mostra badge se serviço veio pela URL
+            if (formData.servico) {
+                document.getElementById('servico-badge-text').textContent = formData.servico;
+                document.getElementById('servico-badge').style.display = 'block';
+                document.getElementById('header-sub').style.display = 'none';
+            }
         });
 
         // ─────────────────────────────────────────
@@ -1115,6 +1133,8 @@
                     showError(1, 'Telefone inválido — use o formato (XX) 9XXXX-XXXX');
                     return;
                 }
+                // Se serviço já veio pela URL, pula o step 2
+                if (formData.servico) { target = 3; }
             }
 
             // Validate before leaving step 2
