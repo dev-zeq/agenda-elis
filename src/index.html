@@ -1373,16 +1373,21 @@
             btn.classList.add('loading');
             btn.innerHTML = '<span class="spinner"></span>Enviando…';
 
+            const _totalMin   = getTotalDuracaoMin();
+            const _totalPreco = getTotalPreco();
+            const _duracaoFmt = formatDuracaoTotal(_totalMin);
+
             const payload = {
-                name:      formData.name.trim(),
-                phone:     formatPhoneInternational(formData.phone),
-                date:      formData.date,
-                time:      formData.time,
-                servico:   formData.servico,
-                preco:     getTotalPreco(),
-                duracao:   getTotalDuracaoMin(),
-                message:   `*Nova Solicitação de Agendamento — Elis Miranda*\n\nNome: ${formData.name.trim()}\nTelefone: ${formData.phone}\nServiço: ${formData.servico} (R$ ${getTotalPreco()})\nDuração: ${formatDuracaoTotal(getTotalDuracaoMin())}\nData: ${formData.dateLabel}\nHorário: ${formData.time}\n\n_Confirmar agendamento via WhatsApp_`,
-                timestamp: new Date().toISOString(),
+                name:             formData.name.trim(),
+                phone:            formatPhoneInternational(formData.phone),
+                date:             formData.date,
+                time:             formData.time,
+                servico:          formData.servico,
+                preco:            _totalPreco,
+                duracao:          _totalMin,
+                duracaoFormatada: _duracaoFmt,
+                message:          `*Nova Solicitação de Agendamento — Elis Miranda*\n\nNome: ${formData.name.trim()}\nTelefone: ${formData.phone}\nServiço: ${formData.servico}\nValor: R$ ${_totalPreco}\nDuração: ${_duracaoFmt}\nData: ${formData.dateLabel}\nHorário: ${formData.time}\n\n_Confirmar agendamento via WhatsApp_`,
+                timestamp:        new Date().toISOString(),
             };
 
             try {
