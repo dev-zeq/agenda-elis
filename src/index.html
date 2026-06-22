@@ -1416,6 +1416,17 @@
                 btn.innerHTML = 'Confirmar Agendamento';
             }
         }
+        // Auto-resize quando dentro de iframe (site principal)
+        if (window.parent !== window) {
+            function sendHeight() {
+                window.parent.postMessage(
+                    { type: 'agendaHeight', height: document.body.scrollHeight },
+                    'https://elismiranda.com.br'
+                );
+            }
+            new ResizeObserver(sendHeight).observe(document.body);
+            sendHeight();
+        }
     </script>
 
 </body>
