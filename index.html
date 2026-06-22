@@ -773,7 +773,7 @@
 
                 <div>
                     <span class="field-label">Escolha o horário</span>
-                    <p class="section-hint">São Leopoldo, RS · BRT (UTC-3)</p>
+                    <p class="section-hint">Porto Alegre, RS · BRT (UTC-3)</p>
                 </div>
 
                 <div id="times-grid" class="select-grid-3">
@@ -840,7 +840,7 @@
         </div>
         <!-- /glass-card -->
 
-        <p class="page-footer">elismiranda.com.br &nbsp;·&nbsp; São Leopoldo, RS</p>
+        <p class="page-footer">elismiranda.com.br &nbsp;·&nbsp; Porto Alegre, RS</p>
 
     </div>
     <!-- /page-wrapper -->
@@ -969,6 +969,8 @@
             formData.duracao = s.duracao || '';
             hideError(2);
             document.getElementById('btn-next-2').disabled = false;
+            // Recalcula slots disponíveis com a duração do novo serviço
+            if (selectedDate) updateSlotAvailability();
         }
 
         // ─────────────────────────────────────────
@@ -1052,17 +1054,78 @@
         // ─────────────────────────────────────────
         // Generate Times (09:00 – 17:00)
         // ─────────────────────────────────────────
+        // Converte "HH:MM" em minutos totais
+        function timeToMin(t) {
+            const [h, m] = t.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        // Converte "30min", "1h", "1h30min" → minutos (mínimo 30)
+        function parseDuracaoMin(str) {
+            if (!str) return 30;
+            str = String(str).toLowerCase().trim();
+            let mins = 0;
+            const h = str.match(/(\d+)\s*h/);
+            const m = str.match(/(\d+)\s*min/);
+            if (h) mins += parseInt(h[1]) * 60;
+            if (m) mins += parseInt(m[1]);
+            if (!mins) { const n = parseInt(str); mins = isNaN(n) ? 30 : n; }
+            return Math.max(30, mins);
+        }
+
+        // Slots de 08:30 a 18:00 em intervalos de 30 min
+        function getAllSlots() {
+            const slots = [];
+            let h = 8, m = 30;
+            while (h < 18 || (h === 18 && m === 0)) {
+                slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+                m += 30;
+                if (m === 60) { m = 0; h++; }
+            }
+            return slots;
+        }
+
+        let ocupadosRanges = []; // [{time:"HH:MM", duracao:30}, ...]
+
+        function updateSlotAvailability() {
+            const svcMin  = parseDuracaoMin(formData.duracao);
+            const FECHAMENTO = timeToMin('18:30');
+
+            document.querySelectorAll('#times-grid .btn-select').forEach(btn => {
+                const slotMin = timeToMin(btn.dataset.time);
+                const slotEnd = slotMin + svcMin;
+
+                const foraDoPeriodo = slotEnd > FECHAMENTO;
+                const temConflito   = ocupadosRanges.some(b => {
+                    const bStart = timeToMin(b.time);
+                    const bEnd   = bStart + (b.duracao || 30);
+                    return slotMin < bEnd && slotEnd > bStart;
+                });
+
+                const indisponivel = foraDoPeriodo || temConflito;
+                btn.classList.toggle('occupied', indisponivel);
+                btn.disabled = indisponivel;
+
+                // Desmarca se ficou indisponível
+                if (indisponivel && btn.classList.contains('selected')) {
+                    btn.classList.remove('selected');
+                    formData.time = '';
+                }
+            });
+        }
+
         function generateTimes() {
             const grid = document.getElementById('times-grid');
-            for (let h = 9; h <= 17; h++) {
-                const time = `${String(h).padStart(2, '0')}:00`;
+            grid.innerHTML = '';
+            getAllSlots().forEach(time => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'btn-select';
                 btn.textContent = time;
+                btn.dataset.time = time;
                 btn.addEventListener('click', () => selectTime(time, btn));
                 grid.appendChild(btn);
-            }
+            });
         }
 
         // ─────────────────────────────────────────
@@ -1080,22 +1143,14 @@
             formData.time = '';
             document.getElementById('btn-next-3').disabled = false;
 
-            // Marca horários já ocupados para esta data
-            document.querySelectorAll('#times-grid .btn-select').forEach(b => {
-                b.classList.remove('occupied', 'selected');
-                b.disabled = false;
-            });
+            // Busca horários ocupados e atualiza disponibilidade
+            ocupadosRanges = [];
             try {
                 const res = await fetch(`${SHEETS_URL}?action=horarios&date=${formData.date}`);
                 const data = await res.json();
-                const ocupados = data.times || [];
-                document.querySelectorAll('#times-grid .btn-select').forEach(b => {
-                    if (ocupados.includes(b.textContent.trim())) {
-                        b.classList.add('occupied');
-                        b.disabled = true;
-                    }
-                });
+                ocupadosRanges = data.times || [];
             } catch (e) {}
+            updateSlotAvailability();
         }
 
         function selectTime(time, btn) {
