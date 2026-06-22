@@ -1211,7 +1211,7 @@
         let ocupadosRanges = []; // [{time:"HH:MM", duracao:30}, ...]
 
         function updateSlotAvailability() {
-            const svcMin  = getTotalDuracaoMin();
+            const svcMin     = getTotalDuracaoMin();
             const FECHAMENTO = timeToMin('18:30');
 
             document.querySelectorAll('#times-grid .btn-select').forEach(btn => {
@@ -1229,7 +1229,11 @@
                 btn.classList.toggle('occupied', indisponivel);
                 btn.disabled = indisponivel;
 
-                // Desmarca se ficou indisponível
+                // Mostra horário de término no botão
+                const endH = String(Math.floor(slotEnd / 60)).padStart(2, '0');
+                const endM = String(slotEnd % 60).padStart(2, '0');
+                btn.innerHTML = `<span style="font-size:13px;font-weight:600;">${btn.dataset.time}</span><span style="font-size:9.5px;display:block;margin-top:2px;opacity:0.65;">até ${endH}:${endM}</span>`;
+
                 if (indisponivel && btn.classList.contains('selected')) {
                     btn.classList.remove('selected');
                     formData.time = '';
