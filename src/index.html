@@ -521,6 +521,23 @@
             margin-top: 1px;
         }
 
+        .service-check {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(200, 140, 170, 0.3);
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: transparent;
+            transition: all 0.2s;
+        }
+        .service-card.selected .service-check {
+            background: var(--rose-500);
+            border-color: var(--rose-500);
+            color: white;
+        }
+
         /* ─────────────────────────────────────────
            Success Step
         ───────────────────────────────────────── */
@@ -723,11 +740,20 @@
             <div id="step-2" class="step-content hidden">
 
                 <div>
-                    <span class="field-label">Selecione o serviço</span>
+                    <span class="field-label">Selecione o(s) serviço(s)</span>
+                    <p class="input-hint" style="margin-top:4px;">Pode selecionar mais de um</p>
                 </div>
 
                 <div id="services-grid">
                     <div class="services-loading">Carregando serviços...</div>
+                </div>
+
+                <div id="servicos-resumo" style="display:none; background:rgba(212,175,55,.10); border:1px solid rgba(212,175,55,.28); border-radius:12px; padding:12px 14px;">
+                    <div id="servicos-resumo-lista" style="font-size:13px; color:var(--text-mid); line-height:1.7; margin-bottom:8px;"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:7px; border-top:1px solid rgba(212,175,55,.18);">
+                        <span style="font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted);">Total</span>
+                        <span id="servicos-resumo-total" style="font-size:15px; font-weight:700; color:var(--rose-500);"></span>
+                    </div>
                 </div>
 
                 <div id="error-2" class="error-box hidden">
@@ -858,6 +884,36 @@
         let currentStep = 1;
         let formData = { name: '', phone: '', servico: '', preco: 0, duracao: '', date: '', time: '', dateLabel: '' };
         let selectedDate = null;
+        let selectedServicos = []; // [{id, servico, preco, duracao}, ...]
+
+        function getTotalDuracaoMin() {
+            if (!selectedServicos.length) return parseDuracaoMin(formData.duracao) || 30;
+            return selectedServicos.reduce((sum, s) => sum + parseDuracaoMin(s.duracao), 0);
+        }
+
+        function getTotalPreco() {
+            if (!selectedServicos.length) return Number(formData.preco) || 0;
+            return selectedServicos.reduce((sum, s) => sum + Number(s.preco), 0);
+        }
+
+        function formatDuracaoTotal(mins) {
+            const h = Math.floor(mins / 60);
+            const m = mins % 60;
+            if (!h) return `~${mins}min`;
+            return m ? `~${h}h${m}min` : `~${h}h`;
+        }
+
+        function updateServicosResumo() {
+            const box   = document.getElementById('servicos-resumo');
+            const lista = document.getElementById('servicos-resumo-lista');
+            const total = document.getElementById('servicos-resumo-total');
+            if (!selectedServicos.length) { box.style.display = 'none'; return; }
+            box.style.display = 'block';
+            lista.innerHTML = selectedServicos.map(s =>
+                `<div>• ${s.servico}${s.duracao ? ` <span style="color:var(--text-muted);font-size:11px;">(${s.duracao})</span>` : ''}</div>`
+            ).join('');
+            total.innerHTML = `<span style="font-size:11.5px;color:var(--text-muted);font-weight:500;margin-right:10px;">${formatDuracaoTotal(getTotalDuracaoMin())}</span>R$ ${getTotalPreco()}`;
+        }
 
         // ─────────────────────────────────────────
         // Init
@@ -942,7 +998,11 @@
                     cats[cat].forEach(s => {
                         const card = document.createElement('div');
                         card.className = 'service-card';
+                        card.dataset.serviceId = s.id;
                         card.innerHTML = `
+                            <div class="service-check">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
                             <div class="service-card-name">${s.servico}</div>
                             <div class="service-card-meta">
                                 <div class="service-card-price">R$ ${s.preco}</div>
@@ -961,15 +1021,22 @@
         }
 
         function selectServico(s, card) {
-            document.querySelectorAll('#services-grid .service-card')
-                .forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-            formData.servico = s.servico;
-            formData.preco   = s.preco;
-            formData.duracao = s.duracao || '';
+            const idx = selectedServicos.findIndex(x => String(x.id) === String(s.id));
+            if (idx >= 0) {
+                selectedServicos.splice(idx, 1);
+                card.classList.remove('selected');
+            } else {
+                selectedServicos.push(s);
+                card.classList.add('selected');
+            }
+
+            formData.servico = selectedServicos.map(x => x.servico).join(' + ');
+            formData.preco   = getTotalPreco();
+            formData.duracao = String(getTotalDuracaoMin());
+
+            updateServicosResumo();
             hideError(2);
-            document.getElementById('btn-next-2').disabled = false;
-            // Recalcula slots disponíveis com a duração do novo serviço
+            document.getElementById('btn-next-2').disabled = selectedServicos.length === 0;
             if (selectedDate) updateSlotAvailability();
         }
 
@@ -1088,7 +1155,7 @@
         let ocupadosRanges = []; // [{time:"HH:MM", duracao:30}, ...]
 
         function updateSlotAvailability() {
-            const svcMin  = parseDuracaoMin(formData.duracao);
+            const svcMin  = getTotalDuracaoMin();
             const FECHAMENTO = timeToMin('18:30');
 
             document.querySelectorAll('#times-grid .btn-select').forEach(btn => {
@@ -1224,11 +1291,11 @@
         // Google Sheets — fire and forget
         // Usa no-cors + URLSearchParams para evitar preflight CORS do Apps Script
         // ─────────────────────────────────────────
-        function sendToSheets({ name, phone, date, time, servico }) {
+        function sendToSheets({ name, phone, date, time, servico, duracao }) {
             fetch(SHEETS_URL, {
                 method: 'POST',
                 mode:   'no-cors',
-                body:   new URLSearchParams({ name, phone, date, time, servico: servico || '' }),
+                body:   new URLSearchParams({ action: 'add', name, phone, date, time, servico: servico || '', duracao: String(duracao || '') }),
             }).catch(() => {});
         }
 
@@ -1252,8 +1319,9 @@
                 date:      formData.date,
                 time:      formData.time,
                 servico:   formData.servico,
-                preco:     formData.preco,
-                message:   `*Nova Solicitação de Agendamento — Elis Miranda*\n\nNome: ${formData.name.trim()}\nTelefone: ${formData.phone}\nServiço: ${formData.servico} (R$ ${formData.preco})\nData: ${formData.dateLabel}\nHorário: ${formData.time}\n\n_Confirmar agendamento via WhatsApp_`,
+                preco:     getTotalPreco(),
+                duracao:   getTotalDuracaoMin(),
+                message:   `*Nova Solicitação de Agendamento — Elis Miranda*\n\nNome: ${formData.name.trim()}\nTelefone: ${formData.phone}\nServiço: ${formData.servico} (R$ ${getTotalPreco()})\nDuração: ${formatDuracaoTotal(getTotalDuracaoMin())}\nData: ${formData.dateLabel}\nHorário: ${formData.time}\n\n_Confirmar agendamento via WhatsApp_`,
                 timestamp: new Date().toISOString(),
             };
 
@@ -1272,11 +1340,12 @@
                         date:    formData.date,
                         time:    formData.time,
                         servico: formData.servico,
+                        duracao: getTotalDuracaoMin(),
                     });
 
                     // Populate success card
                     document.getElementById('confirm-servico').textContent = formData.servico;
-                    document.getElementById('confirm-preco').textContent   = `R$ ${formData.preco}`;
+                    document.getElementById('confirm-preco').textContent   = `R$ ${getTotalPreco()}`;
                     document.getElementById('confirm-date').textContent    = formData.dateLabel;
                     document.getElementById('confirm-time').textContent    = formData.time;
 
