@@ -734,10 +734,10 @@
                         type="tel"
                         autocomplete="tel"
                         inputmode="numeric"
-                        placeholder="(51) 9XXXX-XXXX"
+                        placeholder="(51) 9XXXX-XXXX ou +420 XXX XXX XXX"
                         class="input-field"
                     >
-                    <p class="input-hint">A confirmação será enviada para este número</p>
+                    <p class="input-hint">Internacional? Digite com + e o código do país (ex: +420...)</p>
                 </div>
 
                 <div id="error-1" class="error-box hidden">
@@ -985,10 +985,22 @@
         });
 
         // ─────────────────────────────────────────
-        // Phone mask — (XX) 9XXXX-XXXX
+        // Phone mask — BR ou internacional (+DDI)
         // ─────────────────────────────────────────
+        function isInternational(raw) {
+            return raw.trimStart().startsWith('+') || raw.replace(/\D/g, '').length > 11;
+        }
+
         function applyPhoneMask(input) {
-            let v = input.value.replace(/\D/g, '').slice(0, 11);
+            const raw = input.value;
+            if (isInternational(raw)) {
+                // Internacional: permite + e dígitos, sem máscara BR
+                input.value = raw.replace(/[^\d\s+\-().]/g, '');
+                formData.phone = input.value;
+                return;
+            }
+            // Máscara brasileira
+            let v = raw.replace(/\D/g, '').slice(0, 11);
             if (v.length > 10) {
                 v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
             } else if (v.length > 6) {
@@ -1083,13 +1095,14 @@
         // ─────────────────────────────────────────
         function validatePhone(phone) {
             const digits = phone.replace(/\D/g, '');
-            return digits.length >= 10 && digits.length <= 11;
+            return digits.length >= 8 && digits.length <= 15;
         }
 
         function formatPhoneInternational(phone) {
             const digits = phone.replace(/\D/g, '');
-            // Se já tem 12+ dígitos, já inclui código do país
-            return digits.length >= 12 ? digits : '55' + digits;
+            // Internacional: começa com + ou tem 12+ dígitos
+            if (phone.trimStart().startsWith('+') || digits.length >= 12) return digits;
+            return '55' + digits;
         }
 
         // ─────────────────────────────────────────
