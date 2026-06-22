@@ -1191,11 +1191,11 @@
             return Math.max(30, mins);
         }
 
-        // Slots de 08:30 a 19:00 em intervalos de 30 min
+        // Slots de 08:30 a 20:30 em intervalos de 30 min
         function getAllSlots() {
             const slots = [];
             let h = 8, m = 30;
-            while (h < 19 || (h === 19 && m === 0)) {
+            while (h < 20 || (h === 20 && m <= 30)) {
                 slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
                 m += 30;
                 if (m === 60) { m = 0; h++; }
@@ -1207,7 +1207,7 @@
 
         function updateSlotAvailability() {
             const svcMin     = getTotalDuracaoMin();
-            const FECHAMENTO = timeToMin('19:30');
+            const FECHAMENTO = timeToMin('21:00');
 
             document.querySelectorAll('#times-grid .btn-select').forEach(btn => {
                 const slotMin = timeToMin(btn.dataset.time);
