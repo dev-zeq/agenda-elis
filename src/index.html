@@ -1125,7 +1125,7 @@
             const mesOrder = [];
             let count = 0;
 
-            for (let i = 1; count < 30 && i <= 60; i++) {
+            for (let i = 0; count < 30 && i <= 60; i++) {
                 const d = new Date(today);
                 d.setDate(d.getDate() + i);
                 const dow = d.getDay();
@@ -1156,8 +1156,11 @@
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.className = 'btn-select';
+                    const todayStr = today.toISOString().split('T')[0];
+                    const dStr     = d.toISOString().split('T')[0];
+                    const isHoje   = dStr === todayStr;
                     btn.innerHTML = `
-                        <div class="day-label">${d.toLocaleDateString('pt-BR', { weekday: 'short' })}</div>
+                        <div class="day-label">${isHoje ? 'hoje' : d.toLocaleDateString('pt-BR', { weekday: 'short' })}</div>
                         <div class="day-num">${d.getDate()}</div>
                     `;
                     btn.addEventListener('click', () => selectDate(d, btn));
@@ -1209,18 +1212,26 @@
             const svcMin     = getTotalDuracaoMin();
             const FECHAMENTO = timeToMin('21:00');
 
+            const now = new Date();
+            const isToday = selectedDate &&
+                selectedDate.getFullYear() === now.getFullYear() &&
+                selectedDate.getMonth()    === now.getMonth()    &&
+                selectedDate.getDate()     === now.getDate();
+            const nowMin = now.getHours() * 60 + now.getMinutes();
+
             document.querySelectorAll('#times-grid .btn-select').forEach(btn => {
                 const slotMin = timeToMin(btn.dataset.time);
                 const slotEnd = slotMin + svcMin;
 
                 const foraDoPeriodo = slotEnd > FECHAMENTO;
+                const jaPassou      = isToday && slotMin < nowMin;
                 const temConflito   = ocupadosRanges.some(b => {
                     const bStart = timeToMin(b.time);
                     const bEnd   = bStart + (b.duracao || 30);
                     return slotMin < bEnd && slotEnd > bStart;
                 });
 
-                const indisponivel = foraDoPeriodo || temConflito;
+                const indisponivel = foraDoPeriodo || jaPassou || temConflito;
                 btn.classList.toggle('occupied', indisponivel);
                 btn.disabled = indisponivel;
 
