@@ -6,7 +6,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 // Palette: Rose-pink (#f472b6 → #ec4899) · Gold (#d4af37) · Off-white (#faf9f7)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const WEBHOOK_URL = 'https://flow.ezstudio.com.br/webhook/agendamento-elis';
+const WEBHOOK_URL = 'https://autlh.tokewoot.com/functions/v1/webhook-receiver/np3pto5b5gc5x73jvwx7fhyf';
 const SHEETS_URL  = 'https://script.google.com/macros/s/AKfycbysYdOKGxNN_II8nWIAmxnflex5qPcBioGHuIxtk5K-SjqUOVX67Ecw2HpQhwCFp0M/exec';
 
 function sendToSheets({ name, phone, date, time, servico }) {
